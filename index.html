@@ -126,7 +126,7 @@
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                if (email === 'ahmed' && password === '123') {
+                if (email === 'ahmed@gmail.com' && password === '123') {
                     const { data, error } = await db.auth.signInWithPassword({ email: 'ahmed@example.com', password: '123' });
                     if (error) {
                         errorMessage.textContent = 'حدث خطأ أثناء تسجيل الدخول.';
