@@ -9,100 +9,235 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     
     <style>
-        :root{--primary-color:#2a6fdb;--secondary-color:#6c757d;--success-color:#28a745;--danger-color:#dc3545;--info-color:#17a2b8;--light-color:#f8f9fa;--dark-color:#343a40;--border-color:#dee2e6}body{font-family:'Cairo',sans-serif;margin:0;background-color:var(--light-color);color:var(--dark-color)}
-        #auth-container{display:flex;justify-content:center;align-items:center;height:100vh}#login-form{width:100%;max-width:400px;padding:40px;background:#fff;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.1)}#login-form h1{text-align:center;margin-bottom:30px}#auth-container .form-group{margin-bottom:20px}#auth-container .btn{width:100%;padding:12px;font-size:1.1em}#error-message{color:var(--danger-color);text-align:center;margin-top:15px;display:none}#app-container{display:none}.container{max-width:1400px;margin:0 auto;padding:20px}header{background-color:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.05);margin-bottom:20px}.header-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;padding-bottom:15px;margin-bottom:15px;border-bottom:1px solid var(--border-color)}h1{margin:0;font-size:1.8em;color:var(--primary-color)}.search-container{flex-grow:1;display:flex;justify-content:center}#searchInput{width:100%;max-width:500px;padding:12px 15px;border:1px solid var(--border-color);border-radius:25px;font-family:'Cairo',sans-serif;font-size:1em}nav{display:flex;flex-wrap:wrap;gap:10px}.nav-btn{background-color:var(--secondary-color);opacity:.7}.nav-btn.active{background-color:var(--primary-color);opacity:1;font-weight:700}.logout-btn{background-color:var(--danger-color);margin-right:auto}.btn{padding:10px 20px;border:none;border-radius:5px;cursor:pointer;font-size:1em;font-family:'Cairo',sans-serif;color:#fff;transition:background-color .3s;margin:0 5px}.btn-primary{background-color:var(--primary-color)}.btn-secondary{background-color:var(--secondary-color)}.btn-danger{background-color:var(--danger-color)}.btn-info{background-color:var(--info-color)}.view{display:none}.view.active{display:block}.table-container{overflow-x:auto;background-color:#fff;padding:20px;border-radius:8px}table{width:100%;border-collapse:collapse}th,td{text-align:right;padding:15px;border-bottom:1px solid var(--border-color)}th{font-weight:700}td .btn{padding:8px 12px;font-size:.9em}.status{padding:5px 10px;border-radius:20px;color:#fff;font-weight:600;font-size:.9em;text-align:center;display:inline-block;min-width:70px}.status-for-sale{background-color:var(--success-color)}.status-sold{background-color:var(--danger-color)}.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.6);justify-content:center;align-items:center}.modal.active{display:flex}.modal-content{background-color:#fff;padding:30px;border-radius:8px;width:90%;max-width:800px}.modal-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:15px;margin-bottom:25px;border-bottom:1px solid var(--border-color)}.modal-header h2{margin:0}.close-btn{font-size:2em;cursor:pointer;line-height:1}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}.form-group{margin-bottom:10px}.form-group label{display:block;margin-bottom:8px;font-weight:600}.form-group input,.form-group textarea{width:100%;padding:10px;border:1px solid var(--border-color);border-radius:4px;box-sizing:border-box;font-family:'Cairo',sans-serif}#barcode-container{text-align:center;padding:20px}#barcode-product-info{margin-top:15px;font-weight:700;font-size:1.2em}@media print{body *{visibility:hidden}#barcode-modal,#barcode-modal *{visibility:visible}#barcode-modal{position:absolute;left:0;top:0}.modal-content{margin:auto;border:none;box-shadow:none}.modal-header,.modal-footer{display:none}}
+        :root {
+            --primary-color: #2a6fdb;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .header-top {
+             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        h1 { margin: 0; font-size: 1.8em; color: var(--primary-color); }
+
+        .search-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+        #searchInput {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1em;
+        }
+
+        nav {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-btn {
+            flex-grow: 1;
+            background-color: var(--secondary-color);
+            opacity: 0.7;
+        }
+        .nav-btn.active {
+            background-color: var(--primary-color);
+            opacity: 1;
+            font-weight: bold;
+        }
+        
+        .btn {
+            padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;
+            font-size: 1em; font-family: 'Cairo', sans-serif; color: #fff;
+            transition: background-color 0.3s; margin: 0 5px;
+        }
+
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-secondary { background-color: var(--secondary-color); }
+        
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .table-container { 
+            overflow-x: auto; background-color: #fff;
+            padding: 20px; border-radius: 8px;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: right; padding: 15px; border-bottom: 1px solid var(--border-color); }
+        th { font-weight: 700; }
+        td .btn { padding: 8px 12px; font-size: 0.9em;}
+        
+        .status {
+            padding: 5px 10px; border-radius: 20px; color: #fff;
+            font-weight: 600; font-size: 0.9em; text-align: center;
+            display: inline-block; min-width: 70px;
+        }
+        .status-for-sale { background-color: var(--success-color); }
+        .status-sold { background-color: var(--danger-color); }
+
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6);
+            justify-content: center; align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background-color: #fff; padding: 30px; border-radius: 8px;
+            width: 90%; max-width: 800px;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); }
+        .modal-header h2 { margin: 0; }
+        .close-btn { font-size: 2em; cursor: pointer; line-height: 1; }
+        
+        .form-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid var(--border-color);
+            border-radius: 4px; box-sizing: border-box; font-family: 'Cairo', sans-serif;
+        }
+        
+        #barcode-container { text-align: center; padding: 20px; }
+        #barcode-product-info { margin-top: 15px; font-weight: bold; font-size: 1.2em; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #barcode-modal, #barcode-modal * { visibility: visible; }
+            #barcode-modal { position: absolute; left: 0; top: 0; }
+            .modal-content { margin: auto; border: none; box-shadow: none; }
+            .modal-header, .modal-footer { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="auth-container">
-        <form id="login-form">
-            <h1>تسجيل الدخول</h1>
-            <div class="form-group">
-                <label for="email">البريد الإلكتروني</label>
-                <input type="email" id="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">كلمة السر</label>
-                <input type="password" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">دخول</button>
-            <p id="error-message"></p>
-        </form>
-    </div>
-
-    <div id="app-container">
-        <div class="container">
-            <header>
-                <div class="header-top">
-                    <h1 id="main-title">📱 نظام إدارة الأجهزة</h1>
-                    <div class="search-container">
-                        <input type="search" id="searchInput" placeholder="ابحث في القسم الحالي...">
-                    </div>
-                    <button id="logout-btn" class="btn logout-btn">تسجيل الخروج</button>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <h1>📱 نظام إدارة الأجهزة</h1>
+                <div class="search-container">
+                    <input type="search" id="searchInput" placeholder="ابحث في القسم الحالي...">
                 </div>
-                <nav>
-                    <button id="addDeviceBtn" class="btn btn-primary">إضافة جهاز</button>
-                    <button class="nav-btn active" data-view="inventory-view">المخزون الحالي</button>
-                    <button class="nav-btn" data-view="sold-view">الأجهزة المباعة</button>
-                </nav>
-            </header>
-            <main>
-                <div id="inventory-view" class="view active"><div class="table-container"><table><thead><tr><th>كود الجهاز</th><th>نوع الجهاز</th><th>اللون</th><th>سعر الشراء</th><th>الكمية المتاحة</th><th>تاريخ الشراء</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="inventory-table-body"></tbody></table></div></div>
-                <div id="sold-view" class="view"><div class="table-container"><table><thead><tr><th>كود الجهاز</th><th>نوع الجهاز</th><th>اللون</th><th>سعر البيع</th><th>تاريخ البيع</th><th>الكمية المباعة</th><th>تاريخ الشراء</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="sold-table-body"></tbody></table></div></div>
-            </main>
-        </div>
+                <button id="addDeviceBtn" class="btn btn-primary">إضافة جهاز</button>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-view="inventory-view">المخزون الحالي</button>
+                <button class="nav-btn" data-view="sold-view">الأجهزة المباعة</button>
+            </nav>
+        </header>
+
+        <main>
+            <div id="inventory-view" class="view active">
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>نوع الجهاز</th><th>اللون</th><th>المساحة</th><th>سعر الشراء</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                        <tbody id="inventory-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="sold-view" class="view">
+                <div class="table-container">
+                     <table>
+                        <thead><tr><th>نوع الجهاز</th><th>سعر الشراء</th><th>سعر البيع</th><th>تاريخ البيع</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+                        <tbody id="sold-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
     
     <div id="device-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h2 id="modal-title">إضافة جهاز جديد</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-header">
+                <h2 id="modal-title">إضافة جهاز جديد</h2>
+                <span class="close-btn">&times;</span>
+            </div>
             <form id="device-form">
-                <input type="hidden" id="device-id"><h3 style="color: var(--primary-color);">بيانات الشراء والجهاز</h3>
+                <input type="hidden" id="device-id">
+                <h3 style="color: var(--primary-color);">بيانات الشراء والجهاز</h3>
                 <div class="form-grid">
-                    <div class="form-group"><label for="device-code">كود الجهاز</label><input type="text" id="device-code" required></div>
                     <div class="form-group"><label for="device-type">نوع الجهاز</label><input type="text" id="device-type" required></div>
                     <div class="form-group"><label for="device-color">لون الجهاز</label><input type="text" id="device-color"></div>
-                    <div class="form-group"><label for="purchase-price">سعر الشراء</label><input type="number" id="purchase-price" step="0.01" required></div>
-                    <div class="form-group"><label for="available-quantity">الكمية المتاحة</label><input type="number" id="available-quantity" required></div>
+                    <div class="form-group"><label for="device-storage">المساحة (GB)</label><input type="number" id="device-storage"></div>
+                    <div class="form-group"><label for="device-battery">حالة البطارية (%)</label><input type="number" id="device-battery" min="0" max="100"></div>
                     <div class="form-group"><label for="purchase-date">تاريخ الشراء</label><input type="date" id="purchase-date" required></div>
-                </div><hr style="margin: 30px 0;"><h3 style="color: var(--success-color);">بيانات البيع (املأها عند البيع)</h3>
+                    <div class="form-group"><label for="purchase-price">سعر الشراء</label><input type="number" id="purchase-price" step="0.01" required></div>
+                </div>
+                <hr style="margin: 30px 0;">
+                <h3 style="color: var(--success-color);">بيانات البيع (املأها عند البيع)</h3>
                 <div class="form-grid">
-                    <div class="form-group"><label for="sale-date">تاريخ البيع</label><input type="date" id="sale-date"></div>
+                     <div class="form-group"><label for="sale-date">تاريخ البيع</label><input type="date" id="sale-date"></div>
                     <div class="form-group"><label for="sale-price">سعر البيع الفعلي</label><input type="number" id="sale-price" step="0.01"></div>
-                    <div class="form-group"><label for="sold-quantity">الكمية المباعة</label><input type="number" id="sold-quantity"></div>
                     <div class="form-group"><label for="buyer-name">اسم المشتري</label><input type="text" id="buyer-name"></div>
                 </div>
-                <div style="text-align: left; margin-top: 30px;"><button type="submit" class="btn btn-primary">حفظ البيانات</button></div>
+                <div style="text-align: left; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary">حفظ البيانات</button>
+                </div>
             </form>
         </div>
     </div>
     <div id="barcode-modal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
-            <div class="modal-header"><h2>طباعة باركود الجهاز</h2><span class="close-btn">&times;</span></div>
-            <div id="barcode-container"><canvas id="barcode-canvas"></canvas><div id="barcode-product-info"></div></div>
-            <div class="modal-footer" style="text-align: left; margin-top: 20px;"><button id="printBtn" class="btn btn-info">اطبع</button></div>
+            <div class="modal-header">
+                <h2>طباعة باركود الجهاز</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div id="barcode-container">
+                <canvas id="barcode-canvas"></canvas>
+                <div id="barcode-product-info"></div>
+            </div>
+            <div class="modal-footer" style="text-align: left; margin-top: 20px;">
+                 <button id="printBtn" class="btn btn-info">اطبع</button>
+            </div>
         </div>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // استبدل بـ URL مشروعك
-            const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // استبدل بمفتاحك
-
-            const { createClient } = window.supabase;
-            const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-            const authContainer = document.getElementById('auth-container');
-            const appContainer = document.getElementById('app-container');
-            const loginForm = document.getElementById('login-form');
-            const logoutBtn = document.getElementById('logout-btn');
-            const errorMessage = document.getElementById('error-message');
-            const mainTitle = document.getElementById('main-title');
             const addDeviceBtn = document.getElementById('addDeviceBtn');
             const searchInput = document.getElementById('searchInput');
             const navButtons = document.querySelectorAll('.nav-btn');
@@ -114,295 +249,194 @@
             const deviceForm = document.getElementById('device-form');
             const modalTitle = document.getElementById('modal-title');
             const printBtn = document.getElementById('printBtn');
-            const barcodeCanvas = document.getElementById('barcode-canvas');
-            const barcodeProductInfo = document.getElementById('barcode-product-info');
+
+            let devices = JSON.parse(localStorage.getItem('my_devices_db_v4')) || [];
+
+            const saveDevices = () => {
+                localStorage.setItem('my_devices_db_v4', JSON.stringify(devices));
+            };
             
-            let devices = [];
-
-            // --- AUTHENTICATION ---
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                if (email === 'ahmed@gmail.com' && password === '123') {
-                    const { data, error } = await db.auth.signInWithPassword({ email: 'ahmed@example.com', password: '123' });
-                    if (error) {
-                        errorMessage.textContent = 'حدث خطأ أثناء تسجيل الدخول.';
-                        errorMessage.style.display = 'block';
-                    } else {
-                        errorMessage.style.display = 'none';
-                        showApp();
-                        await fetchDevices();
-                    }
-                } else {
-                    errorMessage.textContent = 'البريد الإلكتروني أو كلمة السر غير صحيحة.';
-                    errorMessage.style.display = 'block';
-                }
-            });
-
-            logoutBtn.addEventListener('click', async () => {
-                await db.auth.signOut();
-                showLogin();
-            });
-
-            async function checkUserSession() {
-                const { data: { session } } = await db.auth.getSession();
-                if (session) {
-                    showApp();
-                    await fetchDevices();
-                } else {
-                    showLogin();
-                }
-            }
-
-            function showApp() {
-                authContainer.style.display = 'none';
-                appContainer.style.display = 'block';
-            }
-
-            function showLogin() {
-                authContainer.style.display = 'flex';
-                appContainer.style.display = 'none';
-            }
-
-            // --- DATA FUNCTIONS ---
-            async function fetchDevices() {
-                mainTitle.textContent = '📱 ...جاري تحميل البيانات';
-                const { data, error } = await db.from('devices').select('*').order('created_at', { ascending: false });
-                if (error) {
-                    console.error('Error fetching devices:', error);
-                    alert('فشل تحميل البيانات.');
-                    mainTitle.textContent = '📱 نظام إدارة الأجهزة (خطأ)';
-                    return;
-                }
-                devices = data || [];
-                renderAllViews();
-                mainTitle.textContent = '📱 نظام إدارة الأجهزة';
-            }
-
-            async function saveOrUpdateDevice(deviceData) {
-                mainTitle.textContent = '📱 ...جاري حفظ البيانات';
-                const { id, ...dataToSave } = deviceData;
-                let response;
-                if (id) {
-                    response = await db.from('devices').update(dataToSave).eq('id', id);
-                } else {
-                    response = await db.from('devices').insert({ id: Date.now(), ...dataToSave });
-                }
-                if (response.error) {
-                    console.error('Error saving device:', response.error);
-                    alert('فشل حفظ البيانات.');
-                } else {
-                    await fetchDevices();
-                    // التحقق من تسجيل الدخول تلقائيًا إذا كانت البيانات صالحة
-                    const { data: { session } } = await db.auth.getSession();
-                    if (!session) {
-                        const { error } = await db.auth.signInWithPassword({ email: 'ahmed@gmail.com', password: '123' });
-                        if (!error) {
-                            showApp();
-                            await fetchDevices();
-                        }
-                    }
-                }
-                mainTitle.textContent = '📱 نظام إدارة الأجهزة';
-            }
-
-            async function deleteDevice(deviceId) {
-                if (!confirm('هل أنت متأكد من أنك تريد حذف هذا الجهاز؟')) return;
-                mainTitle.textContent = '📱 ...جاري الحذف';
-                const { error } = await db.from('devices').delete().eq('id', deviceId);
-                if (error) {
-                    console.error('Error deleting device:', error);
-                    alert('فشل حذف الجهاز.');
-                } else {
-                    await fetchDevices();
-                }
-                mainTitle.textContent = '📱 نظام إدارة الأجهزة';
-            }
-
-            // --- BARCODE FUNCTION ---
-            function generateBarcode(deviceId, deviceType) {
-                barcodeModal.classList.add('active');
-                barcodeProductInfo.textContent = `نوع الجهاز: ${deviceType}, كود: ${deviceId}`;
-                new QRCode(barcodeCanvas, {
-                    text: deviceId.toString(),
-                    width: 200,
-                    height: 200,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff"
-                });
-            }
-
-            printBtn.addEventListener('click', () => {
-                window.print();
-            });
-
-            // --- RENDERING & UI ---
-            function renderAllViews() {
+            const renderAllViews = () => {
                 renderInventoryTable();
                 renderSoldTable();
-            }
+            };
 
-            function renderInventoryTable() {
+            const renderInventoryTable = () => {
                 const searchTerm = searchInput.value.toLowerCase().trim();
                 const forSaleDevices = devices.filter(d => 
-                    (d.status === 'للبيع' || !d.status) &&
-                    (searchTerm === '' || d.type.toLowerCase().includes(searchTerm) || (d.color && d.color.toLowerCase().includes(searchTerm)) || d.code.includes(searchTerm))
+                    d.status === 'للبيع' &&
+                    (searchTerm === '' || 
+                    d.type.toLowerCase().includes(searchTerm) || 
+                    (d.color && d.color.toLowerCase().includes(searchTerm)) || 
+                    d.id.includes(searchTerm))
                 );
+
                 inventoryTableBody.innerHTML = '';
                 if (forSaleDevices.length === 0) {
-                    inventoryTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">${searchTerm ? 'لا توجد نتائج بحث' : 'لا توجد أجهزة متاحة للبيع.'}</td></tr>`;
+                    inventoryTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">${searchTerm ? 'لا توجد نتائج تطابق بحثك.' : 'لا توجد أجهزة متاحة للبيع.'}</td></tr>`;
                     return;
                 }
+
                 forSaleDevices.forEach(device => {
-                    inventoryTableBody.innerHTML += `
+                    const row = `
                         <tr>
-                            <td>${device.code || '-'}</td>
-                            <td>${device.type || '-'}</td>
+                            <td>${device.type}</td>
                             <td>${device.color || '-'}</td>
-                            <td>${(device.purchasePrice || 0).toLocaleString()}</td>
-                            <td>${device.availableQuantity || 0}</td>
-                            <td>${device.purchaseDate || '-'}</td>
-                            <td><span class="status status-for-sale">للبيع</span></td>
+                            <td>${device.storage ? device.storage + ' GB' : '-'}</td>
+                            <td>${parseFloat(device.purchasePrice).toLocaleString()}</td>
+                            <td><span class="status status-for-sale">${device.status}</span></td>
                             <td>
                                 <button class="btn btn-primary edit-btn" data-id="${device.id}">تعديل/بيع</button>
-                                <button class="btn btn-info" onclick="generateBarcode('${device.code}', '${device.type}')">باركود</button>
-                                <button class="btn btn-danger delete-btn" data-id="${device.id}">حذف</button>
+                                <button class="btn btn-secondary barcode-btn" data-id="${device.id}">طباعة باركود</button>
                             </td>
                         </tr>
                     `;
+                    inventoryTableBody.innerHTML += row;
                 });
-            }
+            };
 
-            function renderSoldTable() {
+            const renderSoldTable = () => {
                 const searchTerm = searchInput.value.toLowerCase().trim();
                 const soldDevices = devices.filter(d => 
                     d.status === 'مباع' &&
-                    (searchTerm === '' || d.type.toLowerCase().includes(searchTerm) || (d.buyerName && d.buyerName.toLowerCase().includes(searchTerm)) || d.code.includes(searchTerm))
+                    (searchTerm === '' || 
+                    d.type.toLowerCase().includes(searchTerm) || 
+                    (d.buyerName && d.buyerName.toLowerCase().includes(searchTerm)) || 
+                    d.id.includes(searchTerm))
                 );
+
                 soldTableBody.innerHTML = '';
                 if (soldDevices.length === 0) {
-                    soldTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">${searchTerm ? 'لا توجد نتائج بحث' : 'لم يتم بيع أي أجهزة بعد.'}</td></tr>`;
+                    soldTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">${searchTerm ? 'لا توجد نتائج تطابق بحثك.' : 'لم يتم بيع أي أجهزة بعد.'}</td></tr>`;
                     return;
                 }
+                
                 soldDevices.forEach(device => {
-                    soldTableBody.innerHTML += `
+                    const row = `
                         <tr>
-                            <td>${device.code || '-'}</td>
-                            <td>${device.type || '-'}</td>
-                            <td>${device.color || '-'}</td>
-                            <td>${(device.salePrice || 0).toLocaleString()}</td>
-                            <td>${device.saleDate || '-'}</td>
-                            <td>${device.soldQuantity || 0}</td>
-                            <td>${device.purchaseDate || '-'}</td>
-                            <td><span class="status status-sold">مباع</span></td>
+                            <td>${device.type}</td>
+                            <td>${parseFloat(device.purchasePrice).toLocaleString()}</td>
+                            <td>${parseFloat(device.salePrice).toLocaleString()}</td>
+                            <td>${device.saleDate}</td>
+                            <td><span class="status status-sold">${device.status}</span></td>
                             <td>
                                 <button class="btn btn-primary edit-btn" data-id="${device.id}">عرض/تعديل</button>
-                                <button class="btn btn-danger delete-btn" data-id="${device.id}">حذف</button>
+                                <button class="btn btn-secondary barcode-btn" data-id="${device.id}">طباعة باركود</button>
                             </td>
                         </tr>
                     `;
+                    soldTableBody.innerHTML += row;
                 });
-            }
+            };
             
-            function showView(viewId) {
+            const showView = (viewId) => {
                 views.forEach(view => view.classList.remove('active'));
                 document.getElementById(viewId)?.classList.add('active');
-                navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewId));
+                
+                navButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === viewId);
+                });
                 renderAllViews();
-            }
+            };
 
-            function openModal(modalId, device = null) {
+            const openModal = (modalId, device = null) => {
                 const modal = document.getElementById(modalId);
                 if (!modal) return;
+
                 if (modalId === 'device-modal') {
                     deviceForm.reset();
                     if (device) {
                         modalTitle.textContent = 'تعديل بيانات الجهاز';
                         document.getElementById('device-id').value = device.id;
-                        document.getElementById('device-code').value = device.code || '';
-                        document.getElementById('device-type').value = device.type || '';
-                        document.getElementById('device-color').value = device.color || '';
-                        document.getElementById('purchase-price').value = device.purchasePrice || '';
-                        document.getElementById('available-quantity').value = device.availableQuantity || 1;
-                        document.getElementById('purchase-date').value = device.purchaseDate || '';
+                        document.getElementById('device-type').value = device.type;
+                        document.getElementById('device-color').value = device.color;
+                        document.getElementById('device-storage').value = device.storage;
+                        document.getElementById('device-battery').value = device.battery;
+                        document.getElementById('purchase-date').value = device.purchaseDate;
+                        document.getElementById('purchase-price').value = device.purchasePrice;
                         document.getElementById('sale-date').value = device.saleDate || '';
                         document.getElementById('sale-price').value = device.salePrice || '';
-                        document.getElementById('sold-quantity').value = device.soldQuantity || '';
                         document.getElementById('buyer-name').value = device.buyerName || '';
                     } else {
                         modalTitle.textContent = 'إضافة جهاز جديد';
                         document.getElementById('device-id').value = '';
-                        document.getElementById('available-quantity').value = 1;
                     }
                 } else if (modalId === 'barcode-modal' && device) {
-                    generateBarcode(device.code, device.type);
+                    const canvas = document.getElementById('barcode-canvas');
+                    const productInfo = document.getElementById('barcode-product-info');
+                    QRCode.toCanvas(canvas, device.id, { width: 256 }, (error) => {
+                        if (error) console.error(error);
+                        productInfo.textContent = `${device.type} - ${device.color || ''}`;
+                    });
                 }
                 modal.classList.add('active');
-            }
+            };
 
-            function closeModal() {
+            const closeModal = () => {
                 document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
-            }
+            };
 
             deviceForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const deviceCode = document.getElementById('device-code').value.trim();
-                const deviceType = document.getElementById('device-type').value.trim();
-                const purchasePrice = document.getElementById('purchase-price').value;
-                const availableQuantity = document.getElementById('available-quantity').value;
-                const purchaseDate = document.getElementById('purchase-date').value;
+                const deviceId = document.getElementById('device-id').value;
+                const saleDate = document.getElementById('sale-date').value;
+                const salePrice = document.getElementById('sale-price').value;
+                const status = (saleDate && salePrice) ? 'مباع' : 'للبيع';
 
-                if (!deviceCode || !deviceType || !purchasePrice || !availableQuantity || !purchaseDate) {
-                    alert('يرجى ملء جميع الحقول المطلوبة (كود الجهاز، نوع الجهاز، سعر الشراء، الكمية المتاحة، تاريخ الشراء).');
-                    return;
+                const deviceData = {
+                    id: deviceId ? deviceId : Date.now().toString(),
+                    type: document.getElementById('device-type').value,
+                    color: document.getElementById('device-color').value,
+                    storage: document.getElementById('device-storage').value,
+                    battery: document.getElementById('device-battery').value,
+                    purchaseDate: document.getElementById('purchase-date').value,
+                    purchasePrice: document.getElementById('purchase-price').value,
+                    saleDate: saleDate,
+                    salePrice: salePrice,
+                    buyerName: document.getElementById('buyer-name').value,
+                    status: status
+                };
+                
+                if (deviceId) {
+                    const index = devices.findIndex(d => d.id === deviceId);
+                    devices[index] = deviceData;
+                } else {
+                    devices.push(deviceData);
                 }
 
-                const deviceId = document.getElementById('device-id').value;
-                const deviceData = {
-                    id: deviceId ? Number(deviceId) : null,
-                    code: deviceCode,
-                    type: deviceType,
-                    color: document.getElementById('device-color').value || null,
-                    purchasePrice: Number(purchasePrice),
-                    availableQuantity: Number(availableQuantity),
-                    purchaseDate: purchaseDate,
-                    saleDate: document.getElementById('sale-date').value || null,
-                    salePrice: Number(document.getElementById('sale-price').value) || null,
-                    soldQuantity: Number(document.getElementById('sold-quantity').value) || 0,
-                    buyerName: document.getElementById('buyer-name').value || null,
-                    status: (document.getElementById('sale-date').value && document.getElementById('sale-price').value) ? 'مباع' : 'للبيع'
-                };
-                saveOrUpdateDevice(deviceData);
+                saveDevices();
+                renderAllViews();
                 closeModal();
             });
-
+            
+            addDeviceBtn.addEventListener('click', () => openModal('device-modal'));
+            
             document.querySelector('main').addEventListener('click', (e) => {
                 const target = e.target.closest('.btn');
                 if (!target) return;
                 const deviceId = target.dataset.id;
                 if (!deviceId) return;
-                const device = devices.find(d => String(d.id) === deviceId);
+                const device = devices.find(d => d.id === deviceId);
                 if (target.classList.contains('edit-btn')) {
                     openModal('device-modal', device);
-                } else if (target.classList.contains('delete-btn')) {
-                    deleteDevice(Number(deviceId));
-                } else if (target.classList.contains('btn-info')) {
+                } else if (target.classList.contains('barcode-btn')) {
                     openModal('barcode-modal', device);
                 }
             });
 
-            addDeviceBtn.addEventListener('click', () => openModal('device-modal'));
-            searchInput.addEventListener('input', renderAllViews);
-            navButtons.forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
             document.querySelectorAll('.modal').forEach(modal => {
                 const closeBtn = modal.querySelector('.close-btn');
-                if (closeBtn) closeBtn.addEventListener('click', closeModal);
-                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+                if(closeBtn) {
+                   closeBtn.addEventListener('click', closeModal);
+                }
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
             });
             
-            // --- INITIAL LOAD ---
-            checkUserSession();
+            printBtn.addEventListener('click', () => window.print());
+
+            showView('inventory-view');
         });
     </script>
 </body>
