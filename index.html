@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     
     <style>
@@ -92,6 +93,12 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // استبدل بـ URL مشروعك
+            const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // استبدل بمفتاحك
+
+            const { createClient } = window.supabase;
+            const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
             const authContainer = document.getElementById('auth-container');
             const appContainer = document.getElementById('app-container');
             const loginForm = document.getElementById('login-form');
@@ -112,29 +119,43 @@
             const barcodeCanvas = document.getElementById('barcode-canvas');
             const barcodeProductInfo = document.getElementById('barcode-product-info');
             
-            let devices = [
-                { id: Date.now(), code: "001", type: "يافطة", color: "أحمر", purchasePrice: 9999999999, availableQuantity: 256, status: "للبيع", purchaseDate: "2025-07-28" },
-                { id: Date.now() + 1, code: "002", type: "هاتف", color: "أسود", purchasePrice: 453333333334, availableQuantity: 100, status: "للبيع", purchaseDate: "2025-08-27" }
-            ];
+            let devices = [];
 
             // --- AUTHENTICATION ---
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                if (email === 'ahmedelsheikh' && password === '123456789') {
-                    errorMessage.style.display = 'none';
-                    showApp();
-                    renderAllViews();
+                if (email === 'ahmed' && password === '123') {
+                    const { data, error } = await db.auth.signInWithPassword({ email: 'ahmed@example.com', password: '123' });
+                    if (error) {
+                        errorMessage.textContent = 'حدث خطأ أثناء تسجيل الدخول.';
+                        errorMessage.style.display = 'block';
+                    } else {
+                        errorMessage.style.display = 'none';
+                        showApp();
+                        await fetchDevices();
+                    }
                 } else {
                     errorMessage.textContent = 'البريد الإلكتروني أو كلمة السر غير صحيحة.';
                     errorMessage.style.display = 'block';
                 }
             });
 
-            logoutBtn.addEventListener('click', () => {
+            logoutBtn.addEventListener('click', async () => {
+                await db.auth.signOut();
                 showLogin();
             });
+
+            async function checkUserSession() {
+                const { data: { session } } = await db.auth.getSession();
+                if (session) {
+                    showApp();
+                    await fetchDevices();
+                } else {
+                    showLogin();
+                }
+            }
 
             function showApp() {
                 authContainer.style.display = 'none';
@@ -147,24 +168,48 @@
             }
 
             // --- DATA FUNCTIONS ---
-            function saveOrUpdateDevice(deviceData) {
-                mainTitle.textContent = '📱 ...جاري حفظ البيانات';
-                const { id, ...dataToSave } = deviceData;
-                if (id) {
-                    const index = devices.findIndex(d => d.id === id);
-                    devices[index] = { ...devices[index], ...dataToSave };
-                } else {
-                    devices.push({ id: Date.now(), ...dataToSave });
+            async function fetchDevices() {
+                mainTitle.textContent = '📱 ...جاري تحميل البيانات';
+                const { data, error } = await db.from('devices').select('*').order('created_at', { ascending: false });
+                if (error) {
+                    console.error('Error fetching devices:', error);
+                    alert('فشل تحميل البيانات.');
+                    mainTitle.textContent = '📱 نظام إدارة الأجهزة (خطأ)';
+                    return;
                 }
+                devices = data || [];
                 renderAllViews();
                 mainTitle.textContent = '📱 نظام إدارة الأجهزة';
             }
 
-            function deleteDevice(deviceId) {
+            async function saveOrUpdateDevice(deviceData) {
+                mainTitle.textContent = '📱 ...جاري حفظ البيانات';
+                const { id, ...dataToSave } = deviceData;
+                let response;
+                if (id) {
+                    response = await db.from('devices').update(dataToSave).eq('id', id);
+                } else {
+                    response = await db.from('devices').insert({ id: Date.now(), ...dataToSave });
+                }
+                if (response.error) {
+                    console.error('Error saving device:', response.error);
+                    alert('فشل حفظ البيانات.');
+                } else {
+                    await fetchDevices();
+                }
+                mainTitle.textContent = '📱 نظام إدارة الأجهزة';
+            }
+
+            async function deleteDevice(deviceId) {
                 if (!confirm('هل أنت متأكد من أنك تريد حذف هذا الجهاز؟')) return;
                 mainTitle.textContent = '📱 ...جاري الحذف';
-                devices = devices.filter(d => d.id !== deviceId);
-                renderAllViews();
+                const { error } = await db.from('devices').delete().eq('id', deviceId);
+                if (error) {
+                    console.error('Error deleting device:', error);
+                    alert('فشل حذف الجهاز.');
+                } else {
+                    await fetchDevices();
+                }
                 mainTitle.textContent = '📱 نظام إدارة الأجهزة';
             }
 
@@ -340,7 +385,7 @@
             });
             
             // --- INITIAL LOAD ---
-            showLogin();
+            checkUserSession();
         });
     </script>
 </body>
