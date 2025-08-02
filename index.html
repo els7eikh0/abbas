@@ -52,8 +52,8 @@
                 </nav>
             </header>
             <main>
-                <div id="inventory-view" class="view active"><div class="table-container"><table><thead><tr><th>كود الجهاز</th><th>نوع الجهاز</th><th>اللون</th><th>سعر الشراء</th><th>الكمية المتاحة</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="inventory-table-body"></tbody></table></div></div>
-                <div id="sold-view" class="view"><div class="table-container"><table><thead><tr><th>كود الجهاز</th><th>نوع الجهاز</th><th>سعر البيع</th><th>تاريخ البيع</th><th>الكمية المباعة</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="sold-table-body"></tbody></table></div></div>
+                <div id="inventory-view" class="view active"><div class="table-container"><table><thead><tr><th>كود الجهاز</th><th>نوع الجهاز</th><th>اللون</th><th>سعر الشراء</th><th>الكمية المتاحة</th><th>تاريخ الشراء</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="inventory-table-body"></tbody></table></div></div>
+                <div id="sold-view" class="view"><div class="table-container"><table><thead><tr><th>كود الجهاز</th><th>نوع الجهاز</th><th>اللون</th><th>سعر البيع</th><th>تاريخ البيع</th><th>الكمية المباعة</th><th>تاريخ الشراء</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="sold-table-body"></tbody></table></div></div>
             </main>
         </div>
     </div>
@@ -67,11 +67,9 @@
                     <div class="form-group"><label for="device-code">كود الجهاز</label><input type="text" id="device-code" required></div>
                     <div class="form-group"><label for="device-type">نوع الجهاز</label><input type="text" id="device-type" required></div>
                     <div class="form-group"><label for="device-color">لون الجهاز</label><input type="text" id="device-color"></div>
-                    <div class="form-group"><label for="device-storage">المساحة (GB)</label><input type="number" id="device-storage"></div>
-                    <div class="form-group"><label for="device-battery">حالة البطارية (%)</label><input type="number" id="device-battery" min="0" max="100"></div>
-                    <div class="form-group"><label for="purchase-date">تاريخ الشراء</label><input type="date" id="purchase-date" required></div>
                     <div class="form-group"><label for="purchase-price">سعر الشراء</label><input type="number" id="purchase-price" step="0.01" required></div>
                     <div class="form-group"><label for="available-quantity">الكمية المتاحة</label><input type="number" id="available-quantity" required></div>
+                    <div class="form-group"><label for="purchase-date">تاريخ الشراء</label><input type="date" id="purchase-date" required></div>
                 </div><hr style="margin: 30px 0;"><h3 style="color: var(--success-color);">بيانات البيع (املأها عند البيع)</h3>
                 <div class="form-grid">
                     <div class="form-group"><label for="sale-date">تاريخ البيع</label><input type="date" id="sale-date"></div>
@@ -126,7 +124,7 @@
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                if (email === 'ahmed@gmail.com' && password === '123') {
+                if (email === 'ahmed' && password === '123') {
                     const { data, error } = await db.auth.signInWithPassword({ email: 'ahmed@example.com', password: '123' });
                     if (error) {
                         errorMessage.textContent = 'حدث خطأ أثناء تسجيل الدخول.';
@@ -196,6 +194,15 @@
                     alert('فشل حفظ البيانات.');
                 } else {
                     await fetchDevices();
+                    // التحقق من تسجيل الدخول تلقائيًا إذا كانت البيانات صالحة
+                    const { data: { session } } = await db.auth.getSession();
+                    if (!session) {
+                        const { error } = await db.auth.signInWithPassword({ email: 'ahmed@example.com', password: '123' });
+                        if (!error) {
+                            showApp();
+                            await fetchDevices();
+                        }
+                    }
                 }
                 mainTitle.textContent = '📱 نظام إدارة الأجهزة';
             }
@@ -244,17 +251,18 @@
                 );
                 inventoryTableBody.innerHTML = '';
                 if (forSaleDevices.length === 0) {
-                    inventoryTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">${searchTerm ? 'لا توجد نتائج بحث' : 'لا توجد أجهزة متاحة للبيع.'}</td></tr>`;
+                    inventoryTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">${searchTerm ? 'لا توجد نتائج بحث' : 'لا توجد أجهزة متاحة للبيع.'}</td></tr>`;
                     return;
                 }
                 forSaleDevices.forEach(device => {
                     inventoryTableBody.innerHTML += `
                         <tr>
-                            <td>${device.code}</td>
-                            <td>${device.type}</td>
+                            <td>${device.code || '-'}</td>
+                            <td>${device.type || '-'}</td>
                             <td>${device.color || '-'}</td>
                             <td>${(device.purchasePrice || 0).toLocaleString()}</td>
-                            <td>${device.availableQuantity}</td>
+                            <td>${device.availableQuantity || 0}</td>
+                            <td>${device.purchaseDate || '-'}</td>
                             <td><span class="status status-for-sale">للبيع</span></td>
                             <td>
                                 <button class="btn btn-primary edit-btn" data-id="${device.id}">تعديل/بيع</button>
@@ -274,17 +282,19 @@
                 );
                 soldTableBody.innerHTML = '';
                 if (soldDevices.length === 0) {
-                    soldTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">${searchTerm ? 'لا توجد نتائج بحث' : 'لم يتم بيع أي أجهزة بعد.'}</td></tr>`;
+                    soldTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">${searchTerm ? 'لا توجد نتائج بحث' : 'لم يتم بيع أي أجهزة بعد.'}</td></tr>`;
                     return;
                 }
                 soldDevices.forEach(device => {
                     soldTableBody.innerHTML += `
                         <tr>
-                            <td>${device.code}</td>
-                            <td>${device.type}</td>
+                            <td>${device.code || '-'}</td>
+                            <td>${device.type || '-'}</td>
+                            <td>${device.color || '-'}</td>
                             <td>${(device.salePrice || 0).toLocaleString()}</td>
                             <td>${device.saleDate || '-'}</td>
                             <td>${device.soldQuantity || 0}</td>
+                            <td>${device.purchaseDate || '-'}</td>
                             <td><span class="status status-sold">مباع</span></td>
                             <td>
                                 <button class="btn btn-primary edit-btn" data-id="${device.id}">عرض/تعديل</button>
@@ -310,14 +320,12 @@
                     if (device) {
                         modalTitle.textContent = 'تعديل بيانات الجهاز';
                         document.getElementById('device-id').value = device.id;
-                        document.getElementById('device-code').value = device.code;
-                        document.getElementById('device-type').value = device.type;
+                        document.getElementById('device-code').value = device.code || '';
+                        document.getElementById('device-type').value = device.type || '';
                         document.getElementById('device-color').value = device.color || '';
-                        document.getElementById('device-storage').value = device.storage || '';
-                        document.getElementById('device-battery').value = device.battery || '';
-                        document.getElementById('purchase-date').value = device.purchaseDate || '';
                         document.getElementById('purchase-price').value = device.purchasePrice || '';
                         document.getElementById('available-quantity').value = device.availableQuantity || 1;
+                        document.getElementById('purchase-date').value = device.purchaseDate || '';
                         document.getElementById('sale-date').value = device.saleDate || '';
                         document.getElementById('sale-price').value = device.salePrice || '';
                         document.getElementById('sold-quantity').value = device.soldQuantity || '';
@@ -339,17 +347,26 @@
 
             deviceForm.addEventListener('submit', (e) => {
                 e.preventDefault();
+                const deviceCode = document.getElementById('device-code').value.trim();
+                const deviceType = document.getElementById('device-type').value.trim();
+                const purchasePrice = document.getElementById('purchase-price').value;
+                const availableQuantity = document.getElementById('available-quantity').value;
+                const purchaseDate = document.getElementById('purchase-date').value;
+
+                if (!deviceCode || !deviceType || !purchasePrice || !availableQuantity || !purchaseDate) {
+                    alert('يرجى ملء جميع الحقول المطلوبة (كود الجهاز، نوع الجهاز، سعر الشراء، الكمية المتاحة، تاريخ الشراء).');
+                    return;
+                }
+
                 const deviceId = document.getElementById('device-id').value;
                 const deviceData = {
                     id: deviceId ? Number(deviceId) : null,
-                    code: document.getElementById('device-code').value,
-                    type: document.getElementById('device-type').value,
+                    code: deviceCode,
+                    type: deviceType,
                     color: document.getElementById('device-color').value || null,
-                    storage: Number(document.getElementById('device-storage').value) || null,
-                    battery: Number(document.getElementById('device-battery').value) || null,
-                    purchaseDate: document.getElementById('purchase-date').value,
-                    purchasePrice: Number(document.getElementById('purchase-price').value),
-                    availableQuantity: Number(document.getElementById('available-quantity').value),
+                    purchasePrice: Number(purchasePrice),
+                    availableQuantity: Number(availableQuantity),
+                    purchaseDate: purchaseDate,
                     saleDate: document.getElementById('sale-date').value || null,
                     salePrice: Number(document.getElementById('sale-price').value) || null,
                     soldQuantity: Number(document.getElementById('sold-quantity').value) || 0,
